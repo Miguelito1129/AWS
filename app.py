@@ -21,30 +21,34 @@ app.config.suppress_callback_exceptions = True
 
 # Load data from csv
 def load_data():
-    # To do: Completar la funciÃ³n 
-    
+    df = pd.read_csv(
+        r'C:\Users\mdmm1\OneDrive\Escritorio\Inteligencia\Analisis-de-datos-masivos\Taller AWS 1\datos_energia.csv',
+        encoding='utf-8'  # <-- Asegura la correcta lectura de caracteres especiales
+    )
+    df['fecha'] = pd.to_datetime(df['time'])  # Usa el nombre real de la columna de fecha
+    df.set_index('fecha', inplace=True)
+    return df
 
 # Cargar datos
 data = load_data()
 
-# Graficar serie
 def plot_series(data, initial_date, proy):
     data_plot = data.loc[initial_date:]
     data_plot = data_plot[:-(120-proy)]
     fig = go.Figure([
         go.Scatter(
-            name='Demanda energÃ©tica',
+            name='Demanda energética',
             x=data_plot.index,
             y=data_plot['AT_load_actual_entsoe_transparency'],
             mode='lines',
             line=dict(color="#188463"),
         ),
         go.Scatter(
-            name='ProyecciÃ³n',
+            name='Proyección',
             x=data_plot.index,
             y=data_plot['forecast'],
             mode='lines',
-            line=dict(color="#bbffeb",),
+            line=dict(color="#bbffeb"),
         ),
         go.Scatter(
             name='Upper Bound',
@@ -77,31 +81,26 @@ def plot_series(data, initial_date, proy):
             x=1
         ),
         yaxis_title='Demanda total [MW]',
-        #title='Continuous, variable value error bars',
-        hovermode="x"
+        hovermode="x",
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font_color="#2cfec1"
     )
-    #fig = px.line(data2, x='local_timestamp', y="Demanda total [MW]", markers=True, labels={"local_timestamp": "Fecha"})
-    fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color="#2cfec1")
     fig.update_xaxes(showgrid=True, gridwidth=0.25, gridcolor='#7C7C7C')
     fig.update_yaxes(showgrid=True, gridwidth=0.25, gridcolor='#7C7C7C')
-    #fig.update_traces(line_color='#2cfec1')
 
     return fig
 
 
 
 def description_card():
-    """
-    :return: A Div containing dashboard title & descriptions.
-    """
     return html.Div(
         id="description-card",
         children=[
-            #html.H5("Proyecto 1"),
-            html.H3("PronÃ³stico de producciÃ³n energÃ©tica"),
+            html.H3("Pronóstico de producción energética"),
             html.Div(
                 id="intro",
-                children="Esta herramienta contiene informaciÃ³n sobre la demanda energÃ©tica total en Austria cada hora segÃºn lo pÃºblicado en ENTSO-E Data Portal. Adicionalmente, permite realizar pronÃ³sticos hasta 5 dias en el futuro."
+                children="Esta herramienta contiene información sobre la demanda energética total en Austria cada hora según lo publicado en ENTSO-E Data Portal. Adicionalmente, permite realizar pronósticos hasta 5 días en el futuro."
             ),
         ],
     )
@@ -203,7 +202,7 @@ app.layout = html.Div(
                 html.Div(
                     id="model_graph",
                     children=[
-                        html.B("Demanda energÃ©tica total en Austria [MW]"),
+                        html.B("Demanda energética total en Austria [MW]"),
                         html.Hr(),
                         dcc.Graph(
                             id="plot_series",  
@@ -240,4 +239,4 @@ def update_output_div(date, hour, proy):
 
 # Run the server
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run(debug=True)
